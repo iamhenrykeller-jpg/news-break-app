@@ -120,15 +120,14 @@
             statusMessage.textContent = 'Executing... Please wait.';
             statusMessage.style.color = '#4CAF50';
             teleprompterContainer.textContent = '';
-
+            
+            // Your Apps Script URL will go here
             const scriptUrl = 'https://script.google.com/macros/s/AKfycbyCTyFa_LYNjjDyAChv7LeHnFozghZZoZU-G0nT2cL0lBCsD29tEFp1I4-LCJIKFmmF/exec';
 
-            fetch(scriptUrl, {
-                method: 'POST',
-                body: JSON.stringify(urls),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+            const urlWithParams = `${scriptUrl}?url1=${encodeURIComponent(urls.url1)}&url2=${encodeURIComponent(urls.url2)}&url3=${encodeURIComponent(urls.url3)}`;
+
+            fetch(urlWithParams, {
+                method: 'GET'
             })
             .then(response => {
                 if (!response.ok) {
@@ -157,8 +156,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
