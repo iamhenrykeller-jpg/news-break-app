@@ -74,7 +74,7 @@
             border-radius: 4px;
             padding: 20px;
             text-align: left;
-            white-space: pre-wrap; /* Preserves line breaks from the script */
+            white-space: pre-wrap;
             font-family: 'Courier New', Courier, monospace;
             font-size: 24px;
             line-height: 1.5;
@@ -95,65 +95,4 @@
         </div>
         <div class="input-group">
             <label for="url3">STORY 3:</label>
-            <input type="text" id="url3" name="url3">
-        </div>
-        <button id="execute-btn">START</button>
-        <p id="status-message"></p>
-        <div id="teleprompter-container"></div>
-    </div>
-
-    <script>
-        const executeButton = document.getElementById('execute-btn');
-        const url1Input = document.getElementById('url1');
-        const url2Input = document.getElementById('url2');
-        const url3Input = document.getElementById('url3');
-        const statusMessage = document.getElementById('status-message');
-        const teleprompterContainer = document.getElementById('teleprompter-container');
-
-        executeButton.addEventListener('click', () => {
-            const urls = {
-                url1: url1Input.value,
-                url2: url2Input.value,
-                url3: url3Input.value,
-            };
-
-            statusMessage.textContent = 'Executing... Please wait.';
-            statusMessage.style.color = '#4CAF50';
-            teleprompterContainer.textContent = '';
-            
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbxmAyvRifcKAHOqY7xGW68Vty-vZhc8jy8xeXqj1GU1HMR3YdBPR833K57tVaZRjA/exec';
-
-            fetch(scriptUrl, {
-                method: 'POST',
-                body: JSON.stringify(urls),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok, status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success') {
-                    statusMessage.textContent = 'Success! Slides have been generated and script is ready.';
-                    statusMessage.style.color = '#4CAF50';
-                    if (data.scriptText) {
-                        teleprompterContainer.textContent = data.scriptText;
-                    }
-                } else {
-                    statusMessage.textContent = 'Error: ' + data.message;
-                    statusMessage.style.color = '#f44336';
-                }
-            })
-            .catch(error => {
-                statusMessage.textContent = 'An error occurred: ' + error.message;
-                statusMessage.style.color = '#f44336';
-                console.error('Fetch Error:', error);
-            });
-        });
-    </script>
-</body>
-</html>
+            <input type="text" id="url3" name="url
