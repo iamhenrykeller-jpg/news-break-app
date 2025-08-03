@@ -61,6 +61,10 @@
         #execute-btn:hover {
             background-color: #3963b6;
         }
+        #execute-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
         #status-message {
             margin-top: 20px;
             color: #f44336;
@@ -79,6 +83,37 @@
             font-size: 24px;
             line-height: 1.5;
             color: #f0f0f0;
+            /* Added for fixed height and scrolling */
+            height: 300px; 
+            overflow-y: auto; 
+        }
+        /* Added for new buttons */
+        .teleprompter-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .teleprompter-controls button {
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+        }
+        .teleprompter-controls .start-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .teleprompter-controls .start-btn:hover {
+            background-color: #218838;
+        }
+        .teleprompter-controls .stop-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .teleprompter-controls .stop-btn:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
@@ -100,6 +135,10 @@
         <button id="execute-btn">START</button>
         <p id="status-message"></p>
         <div id="teleprompter-container"></div>
+        <div class="teleprompter-controls" style="display: none;">
+            <button class="start-btn" id="start-reading-btn">Start Reading</button>
+            <button class="stop-btn" id="stop-reading-btn">Stop Reading</button>
+        </div>
     </div>
 
     <script>
@@ -109,6 +148,15 @@
         const url3Input = document.getElementById('url3');
         const statusMessage = document.getElementById('status-message');
         const teleprompterContainer = document.getElementById('teleprompter-container');
+        const teleprompterControls = document.querySelector('.teleprompter-controls');
+        const startReadingBtn = document.getElementById('start-reading-btn');
+        const stopReadingBtn = document.getElementById('stop-reading-btn');
+        
+        // Your Apps Script URL will go here
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbwCbKQAtev4eiMAKxM32wL247KoHY0b8u6Y1DeFYH8sS5vrb8HkDLQwlSKenQMI0lYJ/exec';
+
+        let scrollInterval;
+        let scrollSpeed = 50; // Milliseconds per scroll increment. Lower is faster.
 
         executeButton.addEventListener('click', () => {
             const urls = {
@@ -120,8 +168,9 @@
             statusMessage.textContent = 'Executing... Please wait.';
             statusMessage.style.color = '#4CAF50';
             teleprompterContainer.textContent = '';
-            
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbwCbKQAtev4eiMAKxM32wL247KoHY0b8u6Y1DeFYH8sS5vrb8HkDLQwlSKenQMI0lYJ/exec';
+            teleprompterControls.style.display = 'none';
+            stopScrolling(); 
+            executeButton.disabled = true;
 
             fetch(scriptUrl, {
                 method: 'POST',
@@ -142,6 +191,7 @@
                     statusMessage.style.color = '#4CAF50';
                     if (data.scriptText) {
                         teleprompterContainer.textContent = data.scriptText;
+                        teleprompterControls.style.display = 'flex';
                     }
                 } else {
                     statusMessage.textContent = 'Error: ' + data.message;
@@ -152,8 +202,32 @@
                 statusMessage.textContent = 'An error occurred: ' + error.message;
                 statusMessage.style.color = '#f44336';
                 console.error('Fetch Error:', error);
+            })
+            .finally(() => {
+                executeButton.disabled = false;
             });
         });
+
+        startReadingBtn.addEventListener('click', () => {
+            stopScrolling();
+            teleprompterContainer.scrollTop = 0;
+            
+            scrollInterval = setInterval(() => {
+                if (teleprompterContainer.scrollTop >= teleprompterContainer.scrollHeight - teleprompterContainer.clientHeight) {
+                    stopScrolling();
+                } else {
+                    teleprompterContainer.scrollTop += 1;
+                }
+            }, scrollSpeed);
+        });
+
+        stopReadingBtn.addEventListener('click', () => {
+            stopScrolling();
+        });
+
+        function stopScrolling() {
+            clearInterval(scrollInterval);
+        }
     </script>
 </body>
 </html>
