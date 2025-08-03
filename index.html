@@ -61,10 +61,6 @@
         #execute-btn:hover {
             background-color: #3963b6;
         }
-        #execute-btn:disabled {
-            background-color: #666;
-            cursor: not-allowed;
-        }
         #status-message {
             margin-top: 20px;
             color: #f44336;
@@ -83,16 +79,16 @@
             font-size: 24px;
             line-height: 1.5;
             color: #f0f0f0;
-            height: 300px; /* Added for fixed height */
-            overflow-y: auto; /* Added for scrolling */
+            /* 👇 ADDED CSS FOR SCROLLING 👇 */
+            height: 300px; /* Fixed height for the container */
+            overflow-y: auto; /* Enable vertical scrolling */
         }
+        /* 👇 ADDED CSS FOR NEW BUTTONS 👇 */
         .teleprompter-controls {
             margin-top: 10px;
             display: flex;
             gap: 10px;
             justify-content: center;
-            /* Added for hiding the controls initially */
-            display: none; 
         }
         .teleprompter-controls button {
             padding: 10px 20px;
@@ -148,15 +144,16 @@
         const url3Input = document.getElementById('url3');
         const statusMessage = document.getElementById('status-message');
         const teleprompterContainer = document.getElementById('teleprompter-container');
-        const teleprompterControls = document.querySelector('.teleprompter-controls');
+
+        // 👇 ADDED JS FOR NEW BUTTONS AND SCROLLING 👇
         const startReadingBtn = document.getElementById('start-reading-btn');
         const stopReadingBtn = document.getElementById('stop-reading-btn');
         
+        let scrollInterval;
+        let scrollSpeed = 50; // milliseconds per scroll increment. Lower is faster.
+
         // Your Apps Script URL will go here
         const scriptUrl = 'https://script.google.com/macros/s/AKfycbxv8_fUp_9HgG2RgwxjJet9sCC9EEgXHtrtgEVQ2LucUYxRs954U5P6oAfOs8Eri6WY/exec';
-        
-        let scrollInterval;
-        let scrollSpeed = 50; // Milliseconds per scroll increment. Lower is faster.
 
         executeButton.addEventListener('click', () => {
             const urls = {
@@ -168,8 +165,8 @@
             statusMessage.textContent = 'Executing... Please wait.';
             statusMessage.style.color = '#4CAF50';
             teleprompterContainer.textContent = '';
-            teleprompterControls.style.display = 'none'; // Hide controls on new run
-            stopScrolling(); // Stop any existing scrolling
+            
+            // Disable button to prevent multiple submissions
             executeButton.disabled = true;
 
             const urlWithParams = `${scriptUrl}?url1=${encodeURIComponent(urls.url1)}&url2=${encodeURIComponent(urls.url2)}&url3=${encodeURIComponent(urls.url3)}`;
@@ -189,7 +186,6 @@
                     statusMessage.style.color = '#4CAF50';
                     if (data.scriptText) {
                         teleprompterContainer.textContent = data.scriptText;
-                        teleprompterControls.style.display = 'flex'; // Show controls
                     }
                 } else {
                     statusMessage.textContent = 'Error: ' + data.message;
@@ -202,14 +198,15 @@
                 console.error('Fetch Error:', error);
             })
             .finally(() => {
+                // Re-enable the button once the request is complete
                 executeButton.disabled = false;
             });
         });
-        
+
+        // 👇 NEW EVENT LISTENERS FOR SCROLLING 👇
         startReadingBtn.addEventListener('click', () => {
             stopScrolling(); // Clear any existing interval
-            // Ensure the container is at the top before starting to scroll
-            teleprompterContainer.scrollTop = 0;
+            teleprompterContainer.scrollTop = 0; // Start from the top
             
             scrollInterval = setInterval(() => {
                 // Check if we're at the bottom
