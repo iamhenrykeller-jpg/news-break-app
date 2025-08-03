@@ -78,19 +78,21 @@
             border-radius: 4px;
             padding: 20px;
             text-align: left;
+            white-space: pre-wrap;
             font-family: 'Courier New', Courier, monospace;
             font-size: 24px;
             line-height: 1.5;
             color: #f0f0f0;
-            white-space: pre-wrap;
-            height: 300px; /* Fixed height for scrolling */
-            overflow-y: auto; /* Enable vertical scrolling */
+            height: 300px; /* Added for fixed height */
+            overflow-y: auto; /* Added for scrolling */
         }
         .teleprompter-controls {
             margin-top: 10px;
             display: flex;
             gap: 10px;
             justify-content: center;
+            /* Added for hiding the controls initially */
+            display: none; 
         }
         .teleprompter-controls button {
             padding: 10px 20px;
@@ -133,7 +135,7 @@
         <button id="execute-btn">START</button>
         <p id="status-message"></p>
         <div id="teleprompter-container"></div>
-        <div class="teleprompter-controls" style="display: none;">
+        <div class="teleprompter-controls">
             <button class="start-btn" id="start-reading-btn">Start Reading</button>
             <button class="stop-btn" id="stop-reading-btn">Stop Reading</button>
         </div>
@@ -149,7 +151,7 @@
         const teleprompterControls = document.querySelector('.teleprompter-controls');
         const startReadingBtn = document.getElementById('start-reading-btn');
         const stopReadingBtn = document.getElementById('stop-reading-btn');
-
+        
         // Your Apps Script URL will go here
         const scriptUrl = 'https://script.google.com/macros/s/AKfycbxv8_fUp_9HgG2RgwxjJet9sCC9EEgXHtrtgEVQ2LucUYxRs954U5P6oAfOs8Eri6WY/exec';
         
@@ -166,7 +168,7 @@
             statusMessage.textContent = 'Executing... Please wait.';
             statusMessage.style.color = '#4CAF50';
             teleprompterContainer.textContent = '';
-            teleprompterControls.style.display = 'none';
+            teleprompterControls.style.display = 'none'; // Hide controls on new run
             stopScrolling(); // Stop any existing scrolling
             executeButton.disabled = true;
 
@@ -187,7 +189,7 @@
                     statusMessage.style.color = '#4CAF50';
                     if (data.scriptText) {
                         teleprompterContainer.textContent = data.scriptText;
-                        teleprompterControls.style.display = 'flex';
+                        teleprompterControls.style.display = 'flex'; // Show controls
                     }
                 } else {
                     statusMessage.textContent = 'Error: ' + data.message;
@@ -206,12 +208,15 @@
         
         startReadingBtn.addEventListener('click', () => {
             stopScrolling(); // Clear any existing interval
+            // Ensure the container is at the top before starting to scroll
             teleprompterContainer.scrollTop = 0;
+            
             scrollInterval = setInterval(() => {
-                if (teleprompterContainer.scrollTop < teleprompterContainer.scrollHeight - teleprompterContainer.clientHeight) {
-                    teleprompterContainer.scrollTop += 1;
-                } else {
+                // Check if we're at the bottom
+                if (teleprompterContainer.scrollTop >= teleprompterContainer.scrollHeight - teleprompterContainer.clientHeight) {
                     stopScrolling();
+                } else {
+                    teleprompterContainer.scrollTop += 1;
                 }
             }, scrollSpeed);
         });
