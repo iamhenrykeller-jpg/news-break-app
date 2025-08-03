@@ -1,315 +1,233 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-    <title>Slide Generator</title>
-
-    <style>
-
-        body {
-
-            font-family: Arial, sans-serif;
-
-            display: flex;
-
-            flex-direction: column;
-
-            justify-content: center;
-
-            align-items: center;
-
-            height: 100vh;
-
-            margin: 0;
-
-            background-color: #1c1d20;
-
-            color: #fff;
-
-        }
-
-        #app-container {
-
-            background-color: #1c1d20;
-
-            padding: 30px;
-
-            border-radius: 8px;
-
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-
-            text-align: center;
-
-            max-width: 600px;
-
-            width: 100%;
-
-        }
-
-        h1 {
-
-            color: white;
-
-            text-align: center;
-
-        }
-
-        .input-group {
-
-            margin-bottom: 20px;
-
-            display: flex;
-
-            flex-direction: column;
-
-            align-items: center;
-
-        }
-
-        .input-group label {
-
-            display: block;
-
-            margin-bottom: 5px;
-
-            font-weight: bold;
-
-            color: #ccc;
-
-        }
-
-        .input-group input {
-
-            width: 300px;
-
-            padding: 10px;
-
-            border: 1px solid #333;
-
-            border-radius: 4px;
-
-            box-sizing: border-box;
-
-            background-color: #141416;
-
-            color: white;
-
-        }
-
-        #execute-btn {
-
-            background-color: #496396;
-
-            color: white;
-
-            padding: 12px 24px;
-
-            border: none;
-
-            border-radius: 4px;
-
-            cursor: pointer;
-
-            font-size: 16px;
-
-            transition: background-color 0.3s ease;
-
-        }
-
-        #execute-btn:hover {
-
-            background-color: #3963b6;
-
-        }
-
-        #status-message {
-
-            margin-top: 20px;
-
-            color: #f44336;
-
-            font-weight: bold;
-
-            text-align: center;
-
-        }
-
-        #teleprompter-container {
-
-            margin-top: 20px;
-
-            background-color: #141416;
-
-            border: 1px solid #333;
-
-            border-radius: 4px;
-
-            padding: 20px;
-
-            text-align: left;
-
-            white-space: pre-wrap;
-
-            font-family: 'Courier New', Courier, monospace;
-
-            font-size: 24px;
-
-            line-height: 1.5;
-
-            color: #f0f0f0;
-
-        }
-
-    </style>
-
+    <title>Slide Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1c1d20;
+            color: #fff;
+        }
+        #app-container {
+            background-color: #1c1d20;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        .input-group input {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #141416;
+            color: white;
+        }
+        #execute-btn {
+            background-color: #496396;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        #execute-btn:hover {
+            background-color: #3963b6;
+        }
+        #execute-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        #status-message {
+            margin-top: 20px;
+            color: #f44336;
+            font-weight: bold;
+            text-align: center;
+        }
+        #teleprompter-container {
+            margin-top: 20px;
+            background-color: #141416;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: left;
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            line-height: 1.5;
+            color: #f0f0f0;
+            /* Added for fixed height and scrolling */
+            height: 300px; 
+            overflow-y: auto; 
+        }
+        /* Added for new buttons */
+        .teleprompter-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .teleprompter-controls button {
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+        }
+        .teleprompter-controls .start-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .teleprompter-controls .start-btn:hover {
+            background-color: #218838;
+        }
+        .teleprompter-controls .stop-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .teleprompter-controls .stop-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
 </head>
-
 <body>
-
-    <div id="app-container">
-
-        <h1>KSAT+ NEWS BREAK</h1>
-
-        <div class="input-group">
-
-            <label for="url1">STORY 1:</label>
-
-            <input type="text" id="url1" name="url1">
-
-        </div>
-
-        <div class="input-group">
-
-            <label for="url2">STORY 2:</label>
-
-            <input type="text" id="url2" name="url2">
-
-        </div>
-
-        <div class="input-group">
-
-            <label for="url3">STORY 3:</label>
-
-            <input type="text" id="url3" name="url3">
-
-        </div>
-
-        <button id="execute-btn">START</button>
-
-        <p id="status-message"></p>
-
-        <div id="teleprompter-container"></div>
-
-    </div>
-
-
-
-    <script>
-
-        const executeButton = document.getElementById('execute-btn');
-
-        const url1Input = document.getElementById('url1');
-
-        const url2Input = document.getElementById('url2');
-
-        const url3Input = document.getElementById('url3');
-
-        const statusMessage = document.getElementById('status-message');
-
-        const teleprompterContainer = document.getElementById('teleprompter-container');
-
-
-
-        executeButton.addEventListener('click', () => {
-
-            const urls = {
-
-                url1: url1Input.value,
-
-                url2: url2Input.value,
-
-                url3: url3Input.value,
-
-            };
-
-
-
-            statusMessage.textContent = 'Executing... Please wait.';
-
-            statusMessage.style.color = '#4CAF50';
-
-            teleprompterContainer.textContent = '';
-
-            
-
-            // Your Apps Script URL will go here
-
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbxv8_fUp_9HgG2RgwxjJet9sCC9EEgXHtrtgEVQ2LucUYxRs954U5P6oAfOs8Eri6WY/exec';
-
-
-
-            const urlWithParams = `${scriptUrl}?url1=${encodeURIComponent(urls.url1)}&url2=${encodeURIComponent(urls.url2)}&url3=${encodeURIComponent(urls.url3)}`;
-
-
-
-            fetch(urlWithParams, {
-
-                method: 'GET'
-
-            })
-
-            .then(response => {
-
-                if (!response.ok) {
-
-                    throw new Error(`Network response was not ok, status: ${response.status}`);
-
-                }
-
-                return response.json();
-
-            })
-
-            .then(data => {
-
-                if (data.status === 'success') {
-
-                    statusMessage.textContent = 'Success! Slides have been generated and script is ready.';
-
-                    statusMessage.style.color = '#4CAF50';
-
-                    if (data.scriptText) {
-
-                        teleprompterContainer.textContent = data.scriptText;
-
-                    }
-
-                } else {
-
-                    statusMessage.textContent = 'Error: ' + data.message;
-
-                    statusMessage.style.color = '#f44336';
-
-                }
-
-            })
-
-            .catch(error => {
-
-                statusMessage.textContent = 'An error occurred: ' + error.message;
-
-                statusMessage.style.color = '#f44336';
-
-                console.error('Fetch Error:', error);
-
-            });
-
-        });
-
-    </script>
-
+    <div id="app-container">
+        <h1>KSAT+ NEWS BREAK</h1>
+        <div class="input-group">
+            <label for="url1">STORY 1:</label>
+            <input type="text" id="url1" name="url1">
+        </div>
+        <div class="input-group">
+            <label for="url2">STORY 2:</label>
+            <input type="text" id="url2" name="url2">
+        </div>
+        <div class="input-group">
+            <label for="url3">STORY 3:</label>
+            <input type="text" id="url3" name="url3">
+        </div>
+        <button id="execute-btn">START</button>
+        <p id="status-message"></p>
+        <div id="teleprompter-container"></div>
+        <div class="teleprompter-controls" style="display: none;">
+            <button class="start-btn" id="start-reading-btn">Start Reading</button>
+            <button class="stop-btn" id="stop-reading-btn">Stop Reading</button>
+        </div>
+    </div>
+
+    <script>
+        const executeButton = document.getElementById('execute-btn');
+        const url1Input = document.getElementById('url1');
+        const url2Input = document.getElementById('url2');
+        const url3Input = document.getElementById('url3');
+        const statusMessage = document.getElementById('status-message');
+        const teleprompterContainer = document.getElementById('teleprompter-container');
+        const teleprompterControls = document.querySelector('.teleprompter-controls');
+        const startReadingBtn = document.getElementById('start-reading-btn');
+        const stopReadingBtn = document.getElementById('stop-reading-btn');
+        
+        // Your Apps Script URL will go here
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbwCbKQAtev4eiMAKxM32wL247KoHY0b8u6Y1DeFYH8sS5vrb8HkDLQwlSKenQMI0lYJ/exec';
+
+        let scrollInterval;
+        let scrollSpeed = 50; // Milliseconds per scroll increment. Lower is faster.
+
+        executeButton.addEventListener('click', () => {
+            const urls = {
+                url1: url1Input.value,
+                url2: url2Input.value,
+                url3: url3Input.value,
+            };
+
+            statusMessage.textContent = 'Executing... Please wait.';
+            statusMessage.style.color = '#4CAF50';
+            teleprompterContainer.textContent = '';
+            teleprompterControls.style.display = 'none';
+            stopScrolling(); 
+            executeButton.disabled = true;
+
+            fetch(scriptUrl, {
+                method: 'POST',
+                body: JSON.stringify(urls),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok, status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    statusMessage.textContent = 'Success! Slides have been generated and script is ready.';
+                    statusMessage.style.color = '#4CAF50';
+                    if (data.scriptText) {
+                        teleprompterContainer.textContent = data.scriptText;
+                        teleprompterControls.style.display = 'flex';
+                    }
+                } else {
+                    statusMessage.textContent = 'Error: ' + data.message;
+                    statusMessage.style.color = '#f44336';
+                }
+            })
+            .catch(error => {
+                statusMessage.textContent = 'An error occurred: ' + error.message;
+                statusMessage.style.color = '#f44336';
+                console.error('Fetch Error:', error);
+            })
+            .finally(() => {
+                executeButton.disabled = false;
+            });
+        });
+
+        startReadingBtn.addEventListener('click', () => {
+            stopScrolling();
+            teleprompterContainer.scrollTop = 0;
+            
+            scrollInterval = setInterval(() => {
+                if (teleprompterContainer.scrollTop >= teleprompterContainer.scrollHeight - teleprompterContainer.clientHeight) {
+                    stopScrolling();
+                } else {
+                    teleprompterContainer.scrollTop += 1;
+                }
+            }, scrollSpeed);
+        });
+
+        stopReadingBtn.addEventListener('click', () => {
+            stopScrolling();
+        });
+
+        function stopScrolling() {
+            clearInterval(scrollInterval);
+        }
+    </script>
 </body>
-
 </html>
