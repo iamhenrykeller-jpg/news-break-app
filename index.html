@@ -91,7 +91,6 @@
             display: flex;
             gap: 10px;
             justify-content: center;
-            align-items: center; /* Align items vertically */
         }
         .teleprompter-controls button {
             padding: 10px 20px;
@@ -113,19 +112,6 @@
         }
         .teleprompter-controls .stop-btn:hover {
             background-color: #c82333;
-        }
-        .speed-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-left: 20px;
-        }
-        .speed-control label {
-            font-size: 14px;
-            font-weight: normal;
-        }
-        .speed-control input[type="range"] {
-            width: 100px;
         }
     </style>
 </head>
@@ -150,11 +136,6 @@
         <div class="teleprompter-controls" style="display: none;">
             <button class="start-btn" id="start-reading-btn">Start Reading</button>
             <button class="stop-btn" id="stop-reading-btn">Stop Reading</button>
-            <button id="voice-control-btn" class="start-btn">Enable Voice Control</button>
-            <div class="speed-control">
-                <label for="speed-slider">Speed:</label>
-                <input type="range" id="speed-slider" min="10" max="200" value="50">
-            </div>
         </div>
     </div>
 
@@ -175,98 +156,6 @@
         let scrollInterval;
         let scrollSpeed = 50; // Milliseconds per scroll increment. Lower is faster.
 
-        // =========================================================
-        // WEB SPEECH API IMPLEMENTATION
-        // =========================================================
-
-        let isVoiceControlActive = false;
-        let textToRead = '';
-        let lastScrollTop = 0; // To prevent excessive scrolling
-
-        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-        if (window.SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-
-            const voiceControlBtn = document.getElementById('voice-control-btn');
-            
-            voiceControlBtn.addEventListener('click', () => {
-                if (isVoiceControlActive) {
-                    recognition.stop();
-                } else {
-                    textToRead = teleprompterContainer.textContent.trim();
-                    if (!textToRead) {
-                        statusMessage.textContent = 'Please generate a script first!';
-                        statusMessage.style.color = '#f44336';
-                        return;
-                    }
-                    recognition.start();
-                    isVoiceControlActive = true;
-                    voiceControlBtn.textContent = 'Disable Voice Control';
-                    voiceControlBtn.classList.remove('start-btn');
-                    voiceControlBtn.classList.add('stop-btn');
-                    stopScrolling(); // Stop any regular scrolling if active
-                }
-            });
-
-            recognition.onresult = (event) => {
-                if (!isVoiceControlActive) return;
-
-                const transcript = event.results[event.results.length - 1][0].transcript;
-                const normalizedScript = teleprompterContainer.textContent.trim().toLowerCase();
-                const normalizedTranscript = transcript.trim().toLowerCase();
-
-                const startIndex = normalizedScript.indexOf(normalizedTranscript);
-
-                if (startIndex !== -1) {
-                    const textBefore = teleprompterContainer.textContent.substring(0, startIndex);
-                    const lineHeight = parseFloat(window.getComputedStyle(teleprompterContainer).lineHeight);
-                    const averageCharWidth = 
-                        (parseFloat(window.getComputedStyle(teleprompterContainer).fontSize) * 0.6);
-                    const containerWidth = teleprompterContainer.clientWidth;
-                    const charsPerLine = containerWidth / averageCharWidth;
-                    
-                    const linesToScroll = textBefore.length / charsPerLine;
-                    const newScrollTop = linesToScroll * lineHeight;
-
-                    // Smoother scrolling transition
-                    teleprompterContainer.scrollTo({
-                        top: newScrollTop,
-                        behavior: 'smooth'
-                    });
-                }
-            };
-
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                recognition.stop();
-                isVoiceControlActive = false;
-                voiceControlBtn.textContent = 'Enable Voice Control';
-                voiceControlBtn.classList.add('start-btn');
-                voiceControlBtn.classList.remove('stop-btn');
-                statusMessage.textContent = 'Voice recognition error. Please try again.';
-                statusMessage.style.color = '#f44336';
-            };
-
-            recognition.onend = () => {
-                if (isVoiceControlActive) {
-                    // This is to make sure it keeps listening continuously
-                    recognition.start();
-                }
-            };
-        } else {
-            document.getElementById('voice-control-btn').style.display = 'none';
-            console.warn("Web Speech API is not supported in this browser. Please use Google Chrome.");
-        }
-
-
-        // =========================================================
-        // EXISTING LOGIC (with minor updates for new features)
-        // =========================================================
-
         executeButton.addEventListener('click', () => {
             const urls = {
                 url1: url1Input.value,
@@ -281,6 +170,7 @@
             stopScrolling(); 
             executeButton.disabled = true;
 
+            // This is the corrected GET request
             const urlWithParams = `${scriptUrl}?url1=${encodeURIComponent(urls.url1)}&url2=${encodeURIComponent(urls.url2)}&url3=${encodeURIComponent(urls.url3)}`;
 
             fetch(urlWithParams, {
@@ -315,31 +205,7 @@
             });
         });
 
-        // Event listener for the speed slider
-        const speedSlider = document.getElementById('speed-slider');
-        speedSlider.addEventListener('input', (e) => {
-            scrollSpeed = e.target.value; 
-            if (scrollInterval) {
-                startScrolling();
-            }
-        });
-
         startReadingBtn.addEventListener('click', () => {
-            if (isVoiceControlActive) {
-                recognition.stop();
-                isVoiceControlActive = false;
-                voiceControlBtn.textContent = 'Enable Voice Control';
-                voiceControlBtn.classList.add('start-btn');
-                voiceControlBtn.classList.remove('stop-btn');
-            }
-            startScrolling();
-        });
-
-        stopReadingBtn.addEventListener('click', () => {
-            stopScrolling();
-        });
-
-        function startScrolling() {
             stopScrolling();
             teleprompterContainer.scrollTop = 0;
             
@@ -350,7 +216,11 @@
                     teleprompterContainer.scrollTop += 1;
                 }
             }, scrollSpeed);
-        }
+        });
+
+        stopReadingBtn.addEventListener('click', () => {
+            stopScrolling();
+        });
 
         function stopScrolling() {
             clearInterval(scrollInterval);
